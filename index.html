@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bar Exam Focus | Sun & Lilac Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // 紫色系 (維持原樣)
+                        viviola: '#AC92B6',
+                        royalHigh: '#715D77',
+                        royalDignity: '#B08DBE',
+                        amurLilac: '#E6D8E6',
+                        bellOfLove: '#F6F0F6',
+                        grapeBottle: '#8D7694',
+                        // 新增黃色/金色系 (對應新圖左側)
+                        sunlight: '#FFF9E6',    // 極淡黃 (背景點綴)
+                        buttery: '#FFD97D',     // 奶油黃 (強調/進度條)
+                        ochre: '#B48A4E',       // 赭金 (輔助邊框)
+                        primary: '#715D77',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 手機模式整體等比例縮小：將 14px 改為 11.5px 讓內容密度更高 */
+        @media (max-width: 640px) {
+            html {
+                font-size: 11.5px; 
+            }
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #F8F4F8; 
+            color: #715D77; 
+            -webkit-font-smoothing: antialiased;
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        .elegant-card {
+            background: white;
+            border-radius: 32px;
+            border: 1px solid #E6D8E6; 
+            box-shadow: 0 4px 15px -2px rgba(113, 93, 119, 0.05);
+        }
+        .yellow-glow {
+            box-shadow: 0 0 20px rgba(255, 217, 125, 0.2);
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "recharts": "https://esm.sh/recharts@^3.6.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "firebase/": "https://esm.sh/firebase@^12.7.0/",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "date-fns": "https://esm.sh/date-fns@^4.1.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module" src="index.tsx"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
