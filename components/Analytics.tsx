@@ -1,14 +1,12 @@
-
 import React, { useMemo } from 'react';
-import { 
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
-  Cell, LabelList
-} from 'recharts';
 import { PracticeLog } from '../types';
 import { format, parseISO } from 'date-fns';
-import { Trash2, Activity, BarChart2, Layers, Award } from 'lucide-react';
+import { Trash2, BarChart2, Layers, Award } from 'lucide-react';
 
-interface AnalyticsProps { practiceLogs: PracticeLog[]; onDeleteLog: (id: string) => void; }
+interface AnalyticsProps { 
+  practiceLogs: PracticeLog[]; 
+  onDeleteLog: (id: string) => void; 
+}
 
 const Analytics: React.FC<AnalyticsProps> = ({ practiceLogs, onDeleteLog }) => {
   const globalStats = useMemo(() => {
@@ -40,7 +38,6 @@ const Analytics: React.FC<AnalyticsProps> = ({ practiceLogs, onDeleteLog }) => {
   return (
     <div className="space-y-7 pb-20">
       <div className="grid grid-cols-2 gap-5">
-         {/* 累計問題數：加入黃色點綴 */}
          <div className="p-9 bg-royalHigh text-white rounded-[48px] shadow-xl shadow-royalHigh/15 relative overflow-hidden group border-b-4 border-buttery/20">
             <div className="absolute -top-6 -right-6 w-24 h-24 bg-buttery/10 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
             <Layers size={22} className="text-buttery mb-5" />
@@ -48,7 +45,6 @@ const Analytics: React.FC<AnalyticsProps> = ({ practiceLogs, onDeleteLog }) => {
             <p className="text-6xl font-[900] text-white mt-2 leading-none tracking-tighter">{globalStats.total}</p>
          </div>
 
-         {/* 平均正答率：背景微調黃色 */}
          <div className="p-9 bg-white border border-amurLilac rounded-[48px] shadow-sm relative overflow-hidden">
             <div className="absolute top-0 right-0 w-12 h-12 bg-sunlight rounded-bl-full pointer-events-none opacity-50"></div>
             <Award size={22} className="text-buttery fill-buttery/10 mb-5" />
@@ -60,7 +56,6 @@ const Analytics: React.FC<AnalyticsProps> = ({ practiceLogs, onDeleteLog }) => {
          </div>
       </div>
 
-      {/* 科目別圖表：使用黃色強調優秀表現 */}
       <div className="bg-white p-9 rounded-[48px] border border-amurLilac shadow-sm">
         <div className="flex justify-between items-center mb-10">
           <div>
@@ -68,34 +63,31 @@ const Analytics: React.FC<AnalyticsProps> = ({ practiceLogs, onDeleteLog }) => {
             <p className="text-[9px] font-bold text-ochre mt-1 uppercase tracking-widest">正答率ランキング</p>
           </div>
         </div>
-        <div className="h-80">
-          {accuracyData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={accuracyData} layout="vertical" margin={{ left: -10, right: 45 }}>
-                <XAxis type="number" domain={[0, 100]} hide />
-                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} width={85} tick={{fontSize: 9, fontWeight: '900', fill: '#8D7694'}} />
-                <Tooltip 
-                  cursor={{fill: '#FFF9E6'}}
-                  contentStyle={{ borderRadius: '20px', border: '1px solid #FFD97D', boxShadow: '0 10px 25px rgba(184, 138, 78, 0.08)', fontWeight: 'bold' }}
-                />
-                <Bar dataKey="accuracy" radius={[0, 15, 15, 0]} barSize={28}>
-                   {accuracyData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.accuracy > 75 ? '#FFD97D' : (entry.accuracy > 60 ? '#AC92B6' : '#C6AFCE')} />
-                   ))}
-                   <LabelList dataKey="label" position="right" style={{ fontSize: '11px', fontWeight: '900', fill: '#8D7694' }} />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center opacity-10">
-              <BarChart2 size={48} className="mb-2" />
-              <p className="text-[10px] font-black uppercase tracking-widest">データなし</p>
-            </div>
-          )}
-        </div>
+        {accuracyData.length > 0 ? (
+          <div className="space-y-4">
+            {accuracyData.map((item) => (
+              <div key={item.name}>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-bold text-royalHigh">{item.name}</span>
+                  <span className="text-lg font-[900] text-buttery">{item.accuracy}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-buttery to-ochre h-full rounded-full transition-all"
+                    style={{ width: `${item.accuracy}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="h-40 flex flex-col items-center justify-center opacity-20">
+            <BarChart2 size={48} className="mb-2" />
+            <p className="text-[10px] font-black uppercase tracking-widest">データなし</p>
+          </div>
+        )}
       </div>
 
-      {/* 演習履歷 */}
       <section className="space-y-4 pt-2">
         <div className="flex items-center gap-2 px-3">
           <div className="w-1 h-1 rounded-full bg-buttery"></div>

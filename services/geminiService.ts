@@ -1,41 +1,28 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
 import { Subject, ErrorEntry } from "../types";
 
-const getAIClient = () => {
-  return new GoogleGenAI({ apiKey: process.env.API_KEY });
-};
-
 /**
- * Generates a weekly study plan based on weak subjects and exam date.
+ * 簡單的本地學習計劃生成
  */
 export async function generateWeeklyPlan(examDate: string, weakSubjects: Subject[]) {
   try {
-    const ai = getAIClient();
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: `Generate a 7-day high-level study plan for the Bar Exam (Exam Date: ${examDate}). Focus on these weak subjects: ${weakSubjects.join(', ')}.`,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              day: { type: Type.STRING },
-              focus: { type: Type.STRING },
-              tasks: { 
-                type: Type.ARRAY,
-                items: { type: Type.STRING }
-              }
-            },
-            required: ["day", "focus", "tasks"]
-          }
-        }
-      }
+    const plan: any[] = [];
+    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    
+    weakSubjects.forEach((subject, index) => {
+      const day = daysOfWeek[index % 7];
+      plan.push({
+        day,
+        focus: `Focus on ${subject}`,
+        tasks: [
+          `Review key concepts in ${subject}`,
+          `Practice 20 questions on ${subject}`,
+          `Create summary notes`
+        ]
+      });
     });
     
-    return JSON.parse(response.text || "[]");
+    return plan;
   } catch (error) {
     console.error("Planner generation error:", error);
     return [];
@@ -43,23 +30,34 @@ export async function generateWeeklyPlan(examDate: string, weakSubjects: Subject
 }
 
 /**
- * Fixed: Added getStudyInsights to analyze missed rules.
- * Uses gemini-3-pro-preview as it is best suited for complex reasoning tasks.
+ * 簡單的本地學習洞察
  */
 export async function getStudyInsights(errors: ErrorEntry[]) {
   try {
-    const ai = getAIClient();
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: `You are an expert Bar Exam tutor. Analyze the following list of missed rules and provide 3-5 high-level strategic study insights. Identify patterns in the mistakes and suggest specific areas for reinforcement.
-      
-      Missed Rules:
-      ${JSON.stringify(errors)}`,
+    if (!errors.length) {
+      return "No errors recorded yet. Great progress!\nKeep practicing consistently.\nReview rules periodically.";
+    }
+
+    const subjectCounts: Record<string, number> = {};
+    errors.forEach(e => {
+      subjectCounts[e.subject] = (subjectCounts[e.subject] || 0) + 1;
     });
+
+    const weakestSubject = Object.entries(subjectCounts).sort((a, b) => b[1] - a[1])[0];
     
-    return response.text || "No insights available yet.";
+    const insights = [
+      `You've made ${errors.length} errors total.`,
+      `Most errors in: ${weakestSubject?.[0] || 'General'}`,
+      `Error rate: ${((errors.length / (errors.length + 100)) * 100).toFixed(1)}%`,
+      `\nRecommendations:`,
+      `• Review ${weakestSubject?.[0] || 'core topics'} rules`,
+      `• Practice similar questions`,
+      `• Create flashcards for weak areas`
+    ];
+    
+    return insights.join('\n');
   } catch (error) {
-    console.error("Study insights generation error:", error);
-    return "Error generating insights. Keep practicing and check back later.";
+    console.error("Study insights error:", error);
+    return "Unable to generate insights. Keep practicing!";
   }
 }

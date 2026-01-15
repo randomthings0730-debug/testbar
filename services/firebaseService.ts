@@ -1,21 +1,4 @@
-
-// Fixed: Using named imports for firebase/app to resolve property existence issues.
-import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, doc, setDoc, getDoc, Firestore } from 'firebase/firestore';
 import { UserProfile, StudyTask, Flashcard, PracticeLog } from '../types';
-
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDra23ynAEQuMK-sCck_vHhqBgCaTXYw20",
-  authDomain: "barexam-master.firebaseapp.com",
-  projectId: "barexam-master",
-  storageBucket: "barexam-master.firebasestorage.app",
-  messagingSenderId: "960918440496",
-  appId: "1:960918440496:web:c25543fba4b24ced3efbf5",
-  measurementId: "G-S7BHQ1KS70"
-};
-
-const USER_DOC_ID = 'personal_study_profile';
 
 export interface AppData {
   profile: UserProfile;
@@ -25,66 +8,27 @@ export interface AppData {
   practiceLogs: PracticeLog[];
 }
 
-let db: Firestore | null = null;
-
-// Fixed: Correctly initialize Firebase app using the modular v9 named exports to fix 'Property getApps does not exist' error.
-const initDb = () => {
-  if (db) return db;
-  try {
-    const apps = getApps();
-    const app = apps.length === 0 ? initializeApp(firebaseConfig) : apps[0];
-    db = getFirestore(app);
-    return db;
-  } catch (e) {
-    console.warn("Firestore initialization failed. Using local-only mode.", e);
-    return null;
-  }
-};
+// 簡單的本地存儲實現，無需 Firebase
+const STORAGE_KEY = 'barExamData';
 
 export async function saveAppData(data: AppData) {
-  // Always save to local storage first for immediate availability
-  localStorage.setItem('barExamData', JSON.stringify({ ...data, lastSynced: new Date().toISOString() }));
-
-  const database = initDb();
-  if (!database) return;
-
   try {
-    const userDoc = doc(database, 'users', USER_DOC_ID);
-    await setDoc(userDoc, {
-      ...data,
-      lastSynced: new Date().toISOString()
-    }, { merge: true });
-  } catch (error: any) {
-    console.warn("Cloud sync deferred (Service potentially unavailable):", error?.message);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    console.log('Data saved to local storage');
+  } catch (e) {
+    console.error('Failed to save data:', e);
   }
 }
 
 export async function loadAppData(): Promise<AppData | null> {
-  // Priority 1: Check Local Storage for immediate startup
-  const localDataStr = localStorage.getItem('barExamData');
-  let localData: AppData | null = null;
-  if (localDataStr) {
-    try {
-      localData = JSON.parse(localDataStr);
-    } catch (e) {
-      console.error("Local data corrupted", e);
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (data) {
+      console.log('Data loaded from local storage');
+      return JSON.parse(data);
     }
+  } catch (e) {
+    console.error('Failed to load data:', e);
   }
-
-  // Priority 2: Try Cloud (if online and available)
-  const database = initDb();
-  if (database) {
-    try {
-      const userDoc = doc(database, 'users', USER_DOC_ID);
-      const snap = await getDoc(userDoc);
-      if (snap.exists()) {
-        const cloudData = snap.data() as AppData;
-        return cloudData;
-      }
-    } catch (error: any) {
-      console.warn("Could not reach cloud storage, using local backup.", error?.message);
-    }
-  }
-
-  return localData;
+  return null;
 }
