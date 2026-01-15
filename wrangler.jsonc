@@ -1,0 +1,15 @@
+{
+  // Worker 名稱
+  "name": "testbar",
+
+  // Worker 編譯日期（保持最新即可）
+  "compatibility_date": "2026-01-15",
+
+  // Worker 主入口檔案
+  "main": "worker.js",
+
+  // 如果你有 KV 或 R2 也可以在這裡綁定
+  "bindings": {
+    // "MY_KV": { "type": "kv_namespace", "namespace_id": "xxx" }
+  }
+}
