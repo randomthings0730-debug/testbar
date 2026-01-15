@@ -3,13 +3,6 @@
   "main": "worker.js",
   "compatibility_date": "2026-01-15",
   "account_id": "21d4512f0de8d729a70493d4cfd51d84",
-  "type": "javascript",
-  
-  // 指定 Pages build 後輸出的靜態檔案目錄
   "pages_build_output_dir": "dist",
-
-  "bindings": {
-    // 如果有 KV 或 R2 可以在這裡綁定
-    // "MY_KV": { "type": "kv_namespace", "namespace_id": "xxx" }
-  }
+  "bindings": {}
 }
