@@ -1,0 +1,38 @@
+name: Build and Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ 取得你的程式碼
+      - uses: actions/checkout@v4
+
+      # 2️⃣ 安裝 Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # 3️⃣ 安裝專案依賴
+      - name: Install dependencies
+        run: npm ci
+
+      # 4️⃣ Build React + Vite 專案
+      - name: Build project
+        run: npm run build
+
+      # 5️⃣ Deploy 到 Cloudflare Pages
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CF_PAGES_API_TOKEN }} # 事先在 GitHub Secrets 設定
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}     # 你的 Cloudflare 帳號 ID
+          projectName: testbar                         # 你 Pages 專案名稱
+          directory: ./dist                            # Vite build 出來的資料夾
