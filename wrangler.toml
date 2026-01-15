@@ -1,14 +1,7 @@
-name = "testbar"
-type = "javascript"
-account_id = "21d4512f0de8d729a70493d4cfd51d84"
-workers_dev = true
-compatibility_date = "2026-01-15"
-
-# 如果你有靜態檔案（Worker Sites）
-# [site]
-# bucket = "./dist"
-# entry-point = "workers-site"
-
-[build]
-command = "npm run build"
-upload_format = "service-worker"
+{
+  "name": "testbar",
+  "main": "worker.js",
+  "compatibility_date": "2026-01-15",
+  "account_id": "21d4512f0de8d729a70493d4cfd51d84",
+  "pages_build_output_dir": "dist"
+}
