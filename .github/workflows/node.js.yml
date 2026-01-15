@@ -11,28 +11,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ 取得你的程式碼
-      - uses: actions/checkout@v4
+      # 1️⃣ 取得代碼
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       # 2️⃣ 安裝 Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.x  # 你也可以改成 20.x 或 18.x
+          cache: 'npm'
 
-      # 3️⃣ 安裝專案依賴
+      # 3️⃣ 安裝依賴
       - name: Install dependencies
         run: npm ci
 
-      # 4️⃣ Build React + Vite 專案
+      # 4️⃣ Build 專案
       - name: Build project
         run: npm run build
 
-      # 5️⃣ Deploy 到 Cloudflare Pages
+      # 5️⃣ 部署到 Cloudflare Pages
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CF_PAGES_API_TOKEN }} # 事先在 GitHub Secrets 設定
-          accountId: ${{ secrets.CF_ACCOUNT_ID }}     # 你的 Cloudflare 帳號 ID
-          projectName: testbar                         # 你 Pages 專案名稱
-          directory: ./dist                            # Vite build 出來的資料夾
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          npx wrangler pages deploy ./dist \
+            --project-name testbar \
+            --branch main
