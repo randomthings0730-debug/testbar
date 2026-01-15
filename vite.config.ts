@@ -8,7 +8,6 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, (process as any).cwd(), '');
   
   return {
-    base: '/testbar/',
     plugins: [react()],
     define: {
       // 根據指令要求，將環境變數映射至 process.env.API_KEY
