@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ 取得代碼
+      # 1️⃣ 取得專案程式碼
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -19,10 +19,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x  # 你也可以改成 20.x 或 18.x
+          node-version: 22.x
           cache: 'npm'
 
-      # 3️⃣ 安裝依賴
+      # 3️⃣ 安裝專案依賴
       - name: Install dependencies
         run: npm ci
 
@@ -34,7 +34,4 @@ jobs:
       - name: Deploy to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-        run: |
-          npx wrangler pages deploy ./dist \
-            --project-name testbar \
-            --branch main
+        run: npx wrangler pages deploy ./dist --project-name testbar --branch main
