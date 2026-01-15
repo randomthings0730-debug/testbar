@@ -1,1 +1,6 @@
-���
+name = "bar-exam-focus-strategic"
+compatibility_date = "2024-03-01"
+
+[pages_build_output_dir]
+# 這裡指定 Vite 編譯後的資料夾
+directory = "dist"
