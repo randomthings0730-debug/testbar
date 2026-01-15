@@ -1,8 +1,8 @@
 
 import React, { useMemo, useState } from 'react';
 import { StudyTask, UserProfile, Subject, PracticeLog, ErrorEntry } from '../types';
-import { Plus, CheckCircle2, Percent, Book, PenTool, Target, ChevronRight, AlertCircle } from 'lucide-react';
-import { format } from 'date-fns';
+import { CheckCircle2, BookOpen, Target, AlertTriangle, ChevronRight, Plus, Trophy } from 'lucide-react';
+import { format, isSameDay, parseISO } from 'date-fns';
 
 interface DashboardProps {
   tasks: StudyTask[];
@@ -14,37 +14,38 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, practiceLogs, onLogMbe, errors = [] }) => {
-  // 系統基準日期：2026-01-14
   const SYSTEM_TODAY = new Date(2026, 0, 14);
   const todayStr = format(SYSTEM_TODAY, 'yyyy-MM-dd');
 
-  // 資料連動核心：使用字串比對確保與 Planner 任務完全一致
-  const todayTasks = useMemo(() => {
-    return tasks.filter(t => t.date === todayStr);
-  }, [tasks, todayStr]);
+  // 1. 今日任務過濾
+  const todayTasks = useMemo(() => tasks.filter(t => t.date === todayStr), [tasks, todayStr]);
   
-  // 自動抓取今日最重要的任務作為重點項目
-  const focusTask = useMemo(() => {
-    return todayTasks.find(t => t.type === 'Outline') || 
-           todayTasks.find(t => t.type === 'Review') || 
-           todayTasks[0];
+  // 【讀什麼】：抓取今日的 Outline 或 Review 任務
+  const readingTask = useMemo(() => 
+    todayTasks.find(t => t.type === 'Outline' || t.type === 'Review'), 
+    [todayTasks]
+  );
+
+  // 【做幾題】：計算今日已完成的題數 vs 今日任務設定的總題數
+  const todayDoneCount = useMemo(() => {
+    return practiceLogs
+      .filter(log => isSameDay(parseISO(log.date), SYSTEM_TODAY))
+      .reduce((acc, log) => acc + log.total, 0);
+  }, [practiceLogs]);
+
+  const todayTargetCount = useMemo(() => {
+    const mbeTask = todayTasks.find(t => t.type === 'MBE');
+    return mbeTask?.count || 20; // 預設 20 題
   }, [todayTasks]);
 
-  const globalTotalDone = useMemo(() => {
-    return practiceLogs.reduce((acc, log) => acc + (log.total || 0), 0);
+  const mbeProgressPercent = Math.min(100, (todayDoneCount / todayTargetCount) * 100);
+
+  // 2. 數據統計
+  const overallAccuracy = useMemo(() => {
+    const total = practiceLogs.reduce((acc, l) => acc + l.total, 0);
+    const wrong = practiceLogs.reduce((acc, l) => acc + l.wrong, 0);
+    return total > 0 ? Math.round(((total - wrong) / total) * 100) : 0;
   }, [practiceLogs]);
-
-  const globalTotalCorrect = useMemo(() => {
-    return practiceLogs.reduce((acc, log) => acc + ((log.total || 0) - (log.wrong || 0)), 0);
-  }, [practiceLogs]);
-
-  const overallAccuracy = globalTotalDone > 0 
-    ? Math.round((globalTotalCorrect / globalTotalDone) * 100) 
-    : 0;
-
-  const totalCompletionPercent = profile.mbeGoal > 0
-    ? Math.min(100, Math.round((globalTotalDone / profile.mbeGoal) * 100))
-    : 0;
 
   const [session, setSession] = useState({ subject: Subject.TORTS, total: '', wrong: '' });
 
@@ -60,111 +61,98 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
   };
 
   return (
-    <div className="space-y-5 pb-10">
+    <div className="space-y-6 pb-12">
       
-      {/* 1. 頂部並排區塊：重點項目 + 平均正答率 */}
-      <section className="grid grid-cols-2 gap-3">
-        {/* 左側：今日重點內容 */}
-        <div className="bg-white rounded-[32px] sm:rounded-[40px] p-4 sm:p-8 border border-amurLilac shadow-sm flex flex-col justify-between hover:border-buttery transition-all">
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl bg-sunlight flex items-center justify-center text-ochre shadow-sm">
-                <Book size={14} className="sm:hidden" />
-                <Book size={20} className="hidden sm:block" />
+      {/* 核心三要素：讀什麼、做幾題、複習什麼 */}
+      <div className="grid grid-cols-1 gap-4">
+        
+        {/* 【讀什麼】 */}
+        <div className="bg-white rounded-[32px] p-6 border-2 border-amurLilac shadow-sm relative overflow-hidden group">
+          <div className="flex items-start justify-between relative z-10">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-ochre">
+                <BookOpen size={16} />
+                <span className="text-[10px] font-black uppercase tracking-widest">今日讀什麼</span>
               </div>
-              <p className="text-[8px] sm:text-[10px] font-black text-ochre uppercase tracking-widest">重点</p>
+              <h2 className="text-xl font-[900] text-royalHigh leading-tight">
+                {readingTask ? readingTask.description : "今日の読書予定はありません"}
+              </h2>
+              <p className="text-[10px] font-bold text-royalDignity uppercase tracking-widest">
+                {readingTask?.subject || "REST DAY"}
+              </p>
             </div>
-            <h2 className="text-sm sm:text-xl font-black text-royalHigh leading-tight line-clamp-2">
-              {focusTask ? focusTask.description : "本日の演習"}
-            </h2>
+            {readingTask?.completed && (
+              <div className="bg-green-100 text-green-600 p-2 rounded-full">
+                <CheckCircle2 size={24} />
+              </div>
+            )}
           </div>
-          <p className="text-[7px] sm:text-[10px] font-bold text-royalDignity uppercase tracking-widest mt-2 flex items-center gap-1">
-            <Target size={10} /> {focusTask?.subject || "All Subjects"}
-          </p>
+          <div className="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+            <BookOpen size={120} />
+          </div>
         </div>
 
-        {/* 右側：平均正答率 */}
-        <div className="bg-white rounded-[32px] sm:rounded-[40px] p-4 sm:p-8 border border-amurLilac shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl bg-bellOfLove flex items-center justify-center text-royalDignity shadow-sm">
-                <Percent size={14} className="sm:hidden" />
-                <Percent size={20} className="hidden sm:block" />
-              </div>
-              <p className="text-[8px] sm:text-[10px] font-black text-grapeBottle/60 uppercase tracking-widest">正答率</p>
+        {/* 【做幾題】 */}
+        <div className="bg-royalHigh rounded-[32px] p-6 text-white shadow-xl shadow-royalHigh/10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2 text-buttery">
+              <Target size={16} />
+              <span className="text-[10px] font-black uppercase tracking-widest">今日該做幾題</span>
             </div>
-            <div className="flex items-baseline gap-1">
-              <p className="text-2xl sm:text-4xl font-[900] text-royalHigh tracking-tighter">{overallAccuracy}</p>
-              <span className="text-[10px] sm:text-xl font-black text-buttery">%</span>
-            </div>
-          </div>
-          <div className="w-full bg-sunlight h-1 sm:h-1.5 rounded-full overflow-hidden mt-2">
-            <div className="bg-royalDignity h-full transition-all duration-1000" style={{ width: `${overallAccuracy}%` }} />
-          </div>
-        </div>
-      </section>
-
-      {/* 2. MBE 總目標進度 */}
-      <section className="bg-royalHigh rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 text-white shadow-xl shadow-royalHigh/10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-bl-full pointer-events-none"></div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4 sm:mb-6">
-            <PenTool size={16} className="text-buttery" />
-            <p className="text-[9px] sm:text-[10px] font-black text-buttery uppercase tracking-[0.2em]">MBE 全体目標達成度</p>
+            <span className="text-[10px] font-black bg-white/10 px-3 py-1 rounded-full">目標: {todayTargetCount} 題</span>
           </div>
           <div className="flex items-baseline gap-2 mb-4">
-            <span className="text-3xl sm:text-5xl font-[900] tracking-tighter">{globalTotalDone}</span>
-            <span className="text-xl sm:text-2xl font-black text-white/20">/</span>
-            <span className="text-xl sm:text-2xl font-[900] text-buttery">{profile.mbeGoal}</span>
-            <span className="text-[8px] sm:text-[10px] font-black text-white/40 ml-2 uppercase tracking-widest">Total Qs</span>
+            <span className="text-5xl font-[900] tracking-tighter">{todayDoneCount}</span>
+            <span className="text-2xl font-black text-white/30">/ {todayTargetCount}</span>
           </div>
-          <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-            <div className="bg-buttery h-full transition-all duration-1000" style={{ width: `${totalCompletionPercent}%` }} />
+          <div className="w-full bg-white/10 h-3 rounded-full overflow-hidden">
+            <div 
+              className="bg-buttery h-full transition-all duration-1000 ease-out" 
+              style={{ width: `${mbeProgressPercent}%` }} 
+            />
           </div>
         </div>
-      </section>
 
-      {/* 3. 複習提醒 */}
-      {errors.length > 0 && (
-        <div className="bg-sunlight p-4 sm:p-5 rounded-[28px] sm:rounded-[32px] border border-buttery/30 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <AlertCircle size={18} className="text-ochre" />
+        {/* 【複習哪些錯誤】 */}
+        <div className="bg-sunlight rounded-[32px] p-6 border border-buttery/30 flex items-center justify-between group cursor-pointer active:scale-[0.98] transition-all">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-ochre shadow-sm border border-buttery/20">
+              <AlertTriangle size={24} />
+            </div>
             <div>
-              <p className="text-[8px] sm:text-[10px] font-black text-ochre uppercase tracking-widest">Error Log Review</p>
-              <p className="text-xs sm:text-sm font-bold text-royalHigh">{errors.length}件の未解決ルール</p>
+              <div className="flex items-center gap-2 text-ochre">
+                <span className="text-[10px] font-black uppercase tracking-widest">要複習哪些錯誤</span>
+              </div>
+              <p className="text-lg font-[900] text-royalHigh">待解決問題：{errors.length} 件</p>
+              {errors.length > 0 && (
+                <p className="text-[10px] font-bold text-ochre/60 line-clamp-1">最新：{errors[0].rule}</p>
+              )}
             </div>
           </div>
-          <ChevronRight size={16} className="text-ochre/30" />
+          <ChevronRight className="text-ochre/40 group-hover:translate-x-1 transition-transform" />
         </div>
-      )}
+      </div>
 
-      {/* 4. 本日のミッション詳細 (連動 Planner 資料) */}
-      <section className="space-y-3">
-        <div className="flex items-center gap-2 px-3">
-          <div className="w-1.5 h-1.5 rounded-full bg-buttery"></div>
-          <h3 className="text-[9px] sm:text-[10px] font-black text-grapeBottle/50 uppercase tracking-[0.2em]">本日のミッション詳細</h3>
+      {/* 輔助資訊：總體正答率與記錄功能 */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-white rounded-[28px] p-5 border border-amurLilac/50 flex flex-col justify-between">
+          <p className="text-[9px] font-black text-grapeBottle/40 uppercase tracking-widest mb-2">平均正答率</p>
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-[900] text-royalHigh">{overallAccuracy}</span>
+            <span className="text-sm font-black text-buttery">%</span>
+          </div>
         </div>
-        <div className="space-y-3">
-          {todayTasks.length > 0 ? todayTasks.map(task => (
-            <div key={task.id} onClick={() => onToggleTask(task.id)} className={`p-4 sm:p-5 rounded-[24px] sm:rounded-[28px] flex items-center gap-4 transition-all cursor-pointer ${task.completed ? 'bg-bellOfLove/50 opacity-40' : 'bg-white border border-amurLilac/40 shadow-sm'}`}>
-              <div className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${task.completed ? 'bg-royalHigh text-white' : 'bg-sunlight text-ochre border border-buttery/20'}`}>
-                {task.completed && <CheckCircle2 size={14} />}
-              </div>
-              <div className="flex-1">
-                <p className="text-[8px] font-black text-royalDignity uppercase tracking-widest mb-0.5">{task.subject}</p>
-                <p className={`text-sm font-bold leading-snug ${task.completed ? 'line-through' : 'text-royalHigh'}`}>{task.description}</p>
-              </div>
-            </div>
-          )) : (
-            <div className="py-12 bg-white/50 rounded-[32px] border border-dashed border-amurLilac/60 text-center">
-               <p className="text-[10px] font-bold text-grapeBottle/30 uppercase tracking-[0.4em] italic">今日の予定はありません</p>
-            </div>
-          )}
+        <div className="bg-white rounded-[28px] p-5 border border-amurLilac/50 flex flex-col justify-between">
+          <p className="text-[9px] font-black text-grapeBottle/40 uppercase tracking-widest mb-2">MBE 累計</p>
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-[900] text-royalHigh">{practiceLogs.reduce((acc, l) => acc + l.total, 0)}</span>
+            <span className="text-[9px] font-black text-grapeBottle/40">/ {profile.mbeGoal}</span>
+          </div>
         </div>
-      </section>
+      </div>
 
-      {/* 5. 演習結果記錄 (底部區塊) */}
-      <section className="bg-white p-6 sm:p-7 rounded-[32px] sm:rounded-[40px] border border-amurLilac shadow-sm relative overflow-hidden">
+      {/* 快速記錄區塊 */}
+      <section className="bg-white p-6 rounded-[32px] border border-amurLilac shadow-sm">
         <div className="flex items-center gap-2 mb-5">
           <Plus size={16} className="text-ochre" />
           <h3 className="text-[10px] font-black text-royalHigh uppercase tracking-widest">演習結果を記録</h3>
@@ -174,16 +162,10 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
             {Object.values(Subject).map(s => <option key={s} value={s}>{s}</option>)}
           </select>
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-[8px] font-black text-ochre uppercase ml-2 tracking-widest">總問題數</label>
-              <input type="number" placeholder="0" className="w-full bg-sunlight border border-buttery/10 rounded-2xl p-4 text-lg font-black outline-none text-royalHigh" value={session.total} onChange={e => setSession({...session, total: e.target.value})} />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[8px] font-black text-grapeBottle/60 uppercase ml-2 tracking-widest">誤答數</label>
-              <input type="number" placeholder="0" className="w-full bg-bellOfLove border border-amurLilac/30 rounded-2xl p-4 text-lg font-black outline-none text-royalDignity" value={session.wrong} onChange={e => setSession({...session, wrong: e.target.value})} />
-            </div>
+            <input type="number" placeholder="Total" className="w-full bg-sunlight border border-buttery/10 rounded-2xl p-4 text-lg font-black outline-none text-royalHigh" value={session.total} onChange={e => setSession({...session, total: e.target.value})} />
+            <input type="number" placeholder="Wrong" className="w-full bg-bellOfLove border border-amurLilac/30 rounded-2xl p-4 text-lg font-black outline-none text-royalDignity" value={session.wrong} onChange={e => setSession({...session, wrong: e.target.value})} />
           </div>
-          <button onClick={handleCommit} className="w-full bg-royalHigh text-white py-5 rounded-[24px] font-[900] text-[11px] uppercase tracking-[0.2em] active:scale-[0.98] transition-all shadow-xl shadow-royalHigh/20 border-b-4 border-ochre/20">
+          <button onClick={handleCommit} className="w-full bg-royalHigh text-white py-5 rounded-[24px] font-[900] text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-royalHigh/10">
             記錄を保存
           </button>
         </div>
