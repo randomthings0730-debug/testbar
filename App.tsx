@@ -109,9 +109,9 @@ const App: React.FC = () => {
           <div className="flex-1 pr-4 sm:pr-6 border-r border-warmPeach mr-4 sm:mr-6">
              <Quote size={16} className="text-accent mb-2 sm:mb-3" />
              <p className="text-[12px] sm:text-[13px] font-bold text-plumDeep leading-snug italic">
-               "Slug it out one inch at a time, day by day."
+               "1インチ、コツコツと前に進もう。"
              </p>
-             <p className="text-[8px] sm:text-[9px] font-black text-slateBlue uppercase tracking-[0.2em] mt-1.5 sm:mt-2">— Charles Munger</p>
+             <p className="text-[8px] sm:text-[9px] font-black text-slateBlue uppercase tracking-[0.2em] mt-1.5 sm:mt-2">— チャールズ・マンガー</p>
           </div>
           <div className="text-right whitespace-nowrap">
             <p className="text-[8px] sm:text-[9px] font-black text-slateBlue uppercase tracking-[0.2em]">試験まで</p>
@@ -149,11 +149,11 @@ const App: React.FC = () => {
       <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-24 sm:h-28 bg-white/95 backdrop-blur-xl border-t border-warmPeach/20 flex items-center justify-around px-4 sm:px-8 pb-5 sm:pb-6 z-50 shadow-[0_-10px_30px_-15px_rgba(113,93,119,0.1)]">
         <button onClick={() => setView('dashboard')} className={`flex flex-col items-center gap-2 pt-3 transition-all active:scale-90 ${view === 'dashboard' ? 'text-primary' : 'text-slateBlue/40'}`}>
           <Target size={28} strokeWidth={view === 'dashboard' ? 3 : 2.5} />
-          <span className={`text-[10px] font-black uppercase tracking-widest ${view === 'dashboard' ? 'opacity-100' : 'opacity-60'}`}>フォーカス</span>
+          <span className={`text-[10px] font-black uppercase tracking-widest ${view === 'dashboard' ? 'opacity-100' : 'opacity-60'}`}>ダッシュボード</span>
         </button>
         <button onClick={() => setView('planner')} className={`flex flex-col items-center gap-2 pt-3 transition-all active:scale-90 ${view === 'planner' ? 'text-primary' : 'text-slateBlue/40'}`}>
           <CalendarIcon size={28} strokeWidth={view === 'planner' ? 3 : 2.5} />
-          <span className={`text-[10px] font-black uppercase tracking-widest ${view === 'planner' ? 'opacity-100' : 'opacity-60'}`}>プラン</span>
+          <span className={`text-[10px] font-black uppercase tracking-widest ${view === 'planner' ? 'opacity-100' : 'opacity-60'}`}>計画</span>
         </button>
         <button onClick={() => setView('analytics')} className={`flex flex-col items-center gap-2 pt-3 transition-all active:scale-90 ${view === 'analytics' ? 'text-primary' : 'text-slateBlue/40'}`}>
           <BarChart3 size={28} strokeWidth={view === 'analytics' ? 3 : 2.5} />

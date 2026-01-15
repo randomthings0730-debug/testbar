@@ -1,3 +1,2 @@
 name = "testbar"
-type = "javascript"
 pages_build_output_dir = "dist"

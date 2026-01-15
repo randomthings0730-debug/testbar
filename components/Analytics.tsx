@@ -65,7 +65,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ practiceLogs, onDeleteLog }) => {
         <div className="flex justify-between items-center mb-10">
           <div>
             <h3 className="text-xs font-black text-royalHigh uppercase tracking-[0.2em]">科目別パフォーマンス</h3>
-            <p className="text-[9px] font-bold text-ochre mt-1 uppercase tracking-widest">Accuracy Ranking</p>
+            <p className="text-[9px] font-bold text-ochre mt-1 uppercase tracking-widest">正答率ランキング</p>
           </div>
         </div>
         <div className="h-80">
@@ -89,7 +89,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ practiceLogs, onDeleteLog }) => {
           ) : (
             <div className="h-full flex flex-col items-center justify-center opacity-10">
               <BarChart2 size={48} className="mb-2" />
-              <p className="text-[10px] font-black uppercase tracking-widest">No Data Yet</p>
+              <p className="text-[10px] font-black uppercase tracking-widest">データなし</p>
             </div>
           )}
         </div>

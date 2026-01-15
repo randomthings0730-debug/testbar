@@ -16,7 +16,7 @@ const ExamSettings: React.FC<ExamSettingsProps> = ({ profile, setProfile }) => {
            <Calendar size={24} />
          </div>
          <div>
-            <h2 className="text-2xl font-[900] text-royalHigh tracking-tight">試験目標</h2>
+            <h2 className="text-2xl font-[900] text-royalHigh tracking-tight">試験目標設定</h2>
             <p className="text-[10px] font-black text-grapeBottle/40 uppercase tracking-widest">Configuration</p>
          </div>
       </div>

@@ -66,7 +66,7 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
         <div className="bg-white rounded-[28px] p-4 border border-amurLilac/50 shadow-sm relative overflow-hidden">
           <div className="flex items-center gap-1.5 text-ochre mb-1">
             <BookOpen size={10} />
-            <span className="text-[8px] font-black uppercase tracking-widest">Reading</span>
+            <span className="text-[8px] font-black uppercase tracking-widest">読書課題</span>
           </div>
           <p className="text-[11px] font-[900] text-royalHigh leading-tight line-clamp-2">
             {readingTask ? readingTask.description : "予定なし"}
@@ -80,7 +80,7 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
         <div className="bg-white rounded-[28px] p-4 border border-amurLilac/50 shadow-sm relative overflow-hidden">
           <div className="flex items-center gap-1.5 text-royalDignity mb-1">
             <Target size={10} />
-            <span className="text-[8px] font-black uppercase tracking-widest">Accuracy</span>
+            <span className="text-[8px] font-black uppercase tracking-widest">正答率</span>
           </div>
           <div className="flex items-baseline gap-0.5">
             <span className="text-xl font-[900] text-royalHigh">{overallAccuracy}</span>
@@ -120,7 +120,7 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
       <section className="space-y-4">
         <div className="flex items-center gap-2 px-1">
           <ListChecks size={16} className="text-ochre" />
-          <h3 className="text-[11px] font-black text-royalHigh uppercase tracking-[0.2em]">今日のミッション</h3>
+          <h3 className="text-[11px] font-black text-royalHigh uppercase tracking-[0.2em]">本日のミッション</h3>
         </div>
         <div className="space-y-3">
           {todayTasks.length > 0 ? (
@@ -147,7 +147,7 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
             ))
           ) : (
             <div className="bg-white/40 border-2 border-dashed border-amurLilac/40 rounded-[28px] py-10 text-center">
-              <p className="text-[10px] font-bold text-grapeBottle/30 uppercase tracking-widest italic">今日のタスクはありません</p>
+              <p className="text-[10px] font-bold text-grapeBottle/30 uppercase tracking-widest italic">本日のタスクはありません</p>
             </div>
           )}
         </div>
@@ -178,7 +178,7 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
               <input type="number" placeholder="5" className="w-full bg-bellOfLove border border-amurLilac/30 rounded-2xl p-4 text-lg font-black outline-none text-royalDignity" value={session.wrong} onChange={e => setSession({...session, wrong: e.target.value})} />
             </div>
           </div>
-          <button onClick={handleCommit} className="w-full bg-royalHigh text-white py-5 rounded-[24px] font-[900] text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-royalHigh/10 active:scale-[0.98] transition-all">
+            <button onClick={handleCommit} className="w-full bg-royalHigh text-white py-5 rounded-[24px] font-[900] text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-royalHigh/10 active:scale-[0.98] transition-all">
             記録を保存
           </button>
         </div>

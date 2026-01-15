@@ -205,7 +205,7 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, deleteTask, toggleTa
       <div className="flex justify-between items-center px-2">
         <div>
           <h2 className="text-2xl font-[900] text-royalHigh tracking-tight">{format(currentMonth, 'yyyy年 M月')}</h2>
-          <p className="text-[9px] font-black text-ochre uppercase tracking-widest mt-1">Study Planner</p>
+          <p className="text-[9px] font-black text-ochre uppercase tracking-widest mt-1">学習計画表</p>
         </div>
         <div className="flex gap-2">
           {/* 生成計畫按鈕 - 根據當前選擇日期 */}
@@ -213,7 +213,7 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, deleteTask, toggleTa
             onClick={generateCoachSchedule} 
             className="px-4 py-2 bg-buttery text-ochre text-[10px] font-black rounded-xl border border-ochre/20 hover:bg-ochre hover:text-white transition-all shadow-sm flex items-center gap-2"
           >
-            <Brain size={14} /> 教練計畫生成
+            <Brain size={14} /> コーチプラン生成
           </button>
           <button onClick={() => setCurrentMonth(prev => addMonths(prev, -1))} className="p-3 bg-white text-royalHigh rounded-2xl shadow-sm hover:bg-sunlight"><ChevronLeft size={18} /></button>
           <button onClick={() => setCurrentMonth(prev => addMonths(prev, 1))} className="p-3 bg-white text-royalHigh rounded-2xl shadow-sm hover:bg-sunlight"><ChevronRight size={18} /></button>
@@ -291,14 +291,14 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, deleteTask, toggleTa
         <div className="fixed inset-0 bg-royalHigh/60 backdrop-blur-md z-[100] flex items-center justify-center p-6 overflow-y-auto">
           <div className="bg-white w-full max-sm rounded-[48px] p-8 shadow-2xl border border-amurLilac animate-in zoom-in duration-300">
             <div className="flex justify-between items-center mb-8">
-              <h3 className="text-2xl font-[900] text-royalHigh">{isNewTask ? '新規タスク' : 'タスク編集'}</h3>
+               <h3 className="text-2xl font-[900] text-royalHigh">{isNewTask ? '新規タスク追加' : 'タスク編集'}</h3>
               <button onClick={() => setIsEditorOpen(false)} className="p-3 bg-sunlight text-ochre rounded-2xl"><X size={20} /></button>
             </div>
             
             <div className="space-y-6">
               <div>
                 <label className="text-[10px] font-black text-ochre uppercase tracking-widest flex items-center gap-2 mb-3 px-1">
-                  <CalendarDays size={12} /> 実施日
+                  <CalendarDays size={12} /> 実施日時
                 </label>
                 <input 
                   type="date"
@@ -310,7 +310,7 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, deleteTask, toggleTa
 
               <div>
                 <label className="text-[10px] font-black text-ochre uppercase tracking-widest flex items-center gap-2 mb-3 px-1">
-                  <Book size={12} /> 法律科目
+                  <Book size={12} /> 対象科目
                 </label>
                 <select 
                   className="w-full bg-sunlight border border-buttery/20 rounded-[24px] p-4 font-black text-xs text-royalHigh outline-none cursor-pointer" 
@@ -345,12 +345,12 @@ const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, deleteTask, toggleTa
 
               <div className="flex flex-col gap-3">
                 <button onClick={saveTask} className="w-full bg-royalHigh text-white py-5 rounded-[28px] font-black uppercase text-[11px] tracking-widest shadow-xl border-b-4 border-buttery/20">
-                  {isNewTask ? '追加を確定する' : '変更を保存する'}
+                  {isNewTask ? '追加を確定する' : '変更内容を保存する'}
                 </button>
                 <div className="flex gap-3">
                   <button onClick={() => setIsEditorOpen(false)} className="flex-1 bg-white text-grapeBottle py-4 rounded-[24px] font-black uppercase text-[9px] border border-amurLilac">キャンセル</button>
                   {!isNewTask && (
-                    <button onClick={handleDeleteInModal} className="flex-1 bg-red-50 text-red-400 py-4 rounded-[24px] font-black uppercase text-[9px] border border-red-100"><Trash2 size={12} className="inline mr-1" /> 削除</button>
+                    <button onClick={handleDeleteInModal} className="flex-1 bg-red-50 text-red-400 py-4 rounded-[24px] font-black uppercase text-[9px] border border-red-100"><Trash2 size={12} className="inline mr-1" /> 削除する</button>
                   )}
                 </div>
               </div>
