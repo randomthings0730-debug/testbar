@@ -1,4 +1,3 @@
 name = "testbar"
-type = "javascript"  # 或 "webpack" / "rust" 依你的專案
-# 靜態檔輸出目錄
+type = "javascript"
 pages_build_output_dir = "dist"
