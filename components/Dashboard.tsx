@@ -1,8 +1,9 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { StudyTask, UserProfile, Subject, PracticeLog, ErrorEntry } from '../types';
-import { CheckCircle2, BookOpen, ChevronRight, Plus, Trophy, Target, ListChecks, Clock } from 'lucide-react';
+import { CheckCircle2, BookOpen, ChevronRight, Plus, Trophy, Target, ListChecks, Clock, Brain, Zap } from 'lucide-react';
 import { format } from 'date-fns';
+import { RuleDeckManager } from '../services/ruleDeckService';
 
 interface DashboardProps {
   tasks: StudyTask[];
@@ -14,8 +15,14 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, practiceLogs, onLogMbe }) => {
-  const SYSTEM_TODAY = new Date(2026, 0, 14);
-  const todayStr = format(SYSTEM_TODAY, 'yyyy-MM-dd');
+  const [systemToday, setSystemToday] = useState<Date>(new Date());
+  
+  // 初始化時從系統獲得今天的日期
+  useEffect(() => {
+    setSystemToday(new Date());
+  }, []);
+
+  const todayStr = format(systemToday, 'yyyy-MM-dd');
 
   // 1. 今日任務 (與 Planner 同步)
   const todayTasks = useMemo(() => 
@@ -44,6 +51,25 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
     return total > 0 ? Math.round(((total - wrong) / total) * 100) : 0;
   }, [practiceLogs]);
 
+  // Memory System Metrics
+  const activeRecallTasks = useMemo(() => {
+    return tasks.filter(t =>
+      t.memoryTag?.includes('active-recall') ||
+      t.memoryTag?.includes('recall') ||
+      t.type === 'ActiveRecall' ||
+      t.type === 'RuleWriting'
+    );
+  }, [tasks]);
+
+  const totalStudyMinutes = useMemo(() => {
+    return tasks.reduce((sum, t) => sum + t.estimatedMinutes, 0);
+  }, [tasks]);
+
+  const activeRecallTimePercent = useMemo(() => {
+    const activeRecallMinutes = activeRecallTasks.reduce((sum, t) => sum + t.estimatedMinutes, 0);
+    return totalStudyMinutes > 0 ? Math.round((activeRecallMinutes / totalStudyMinutes) * 100) : 0;
+  }, [activeRecallTasks, totalStudyMinutes]);
+
   const [session, setSession] = useState({ subject: Subject.TORTS, total: '', wrong: '' });
 
   const handleCommit = () => {
@@ -62,25 +88,26 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
       
       {/* 頂部小區塊：閱讀任務 & 正確率 */}
       <div className="grid grid-cols-2 gap-4">
-        {/* 小區塊：今日読むべきもの */}
+        {/* 小區塊：今日閱讀任務 */}
         <div className="bg-white rounded-[28px] p-4 border border-amurLilac/50 shadow-sm relative overflow-hidden">
           <div className="flex items-center gap-1.5 text-ochre mb-1">
             <BookOpen size={10} />
-            <span className="text-[8px] font-black uppercase tracking-widest">読書課題</span>
+            <span className="text-[8px] font-black uppercase tracking-widest">Today's Reading</span>
           </div>
           <p className="text-[11px] font-[900] text-royalHigh leading-tight line-clamp-2">
-            {readingTask ? readingTask.description : "予定なし"}
+            {readingTask ? readingTask.description : "No tasks"}
           </p>
+          <p className="text-[7px] font-black text-grapeBottle/40 mt-1.5">{format(systemToday, 'MMM dd, EEEE')}</p>
           <div className="absolute -right-2 -bottom-2 opacity-[0.03]">
             <BookOpen size={40} />
           </div>
         </div>
 
-        {/* 小區塊：現在の平均正答率 */}
+        {/* 小區塊：現在的平均正答率 */}
         <div className="bg-white rounded-[28px] p-4 border border-amurLilac/50 shadow-sm relative overflow-hidden">
           <div className="flex items-center gap-1.5 text-royalDignity mb-1">
             <Target size={10} />
-            <span className="text-[8px] font-black uppercase tracking-widest">正答率</span>
+            <span className="text-[8px] font-black uppercase tracking-widest">Accuracy Rate</span>
           </div>
           <div className="flex items-baseline gap-0.5">
             <span className="text-xl font-[900] text-royalHigh">{overallAccuracy}</span>
@@ -97,7 +124,7 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
         <div className="flex items-center justify-between mb-4 relative z-10">
           <div className="flex items-center gap-2 text-buttery">
             <Trophy size={14} />
-            <span className="text-[10px] font-black uppercase tracking-widest">累計達成状況 (MBE)</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">Overall Progress (MBE)</span>
           </div>
           <span className="text-[10px] font-black bg-white/10 px-3 py-1 rounded-full border border-white/10">
             {totalProgressPercent.toFixed(1)}%
@@ -116,11 +143,46 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
       </div>
 
+      {/* Memory System Indicators */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Active Recall Time */}
+        <div className="bg-white rounded-[28px] p-4 border border-amurLilac/50 shadow-sm relative overflow-hidden">
+          <div className="flex items-center gap-1.5 text-royalDignity mb-1">
+            <Brain size={10} />
+            <span className="text-[8px] font-black uppercase tracking-widest">Active Recall</span>
+          </div>
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-xl font-[900] text-royalHigh">{activeRecallTimePercent}</span>
+            <span className="text-[10px] font-black text-buttery">%</span>
+          </div>
+          <p className="text-[7px] font-black text-grapeBottle/40 mt-1">Target: 25-35%</p>
+          <div className="absolute -right-2 -bottom-2 opacity-[0.03]">
+            <Brain size={40} />
+          </div>
+        </div>
+
+        {/* Spaced Repetition Status */}
+        <div className="bg-white rounded-[28px] p-4 border border-amurLilac/50 shadow-sm relative overflow-hidden">
+          <div className="flex items-center gap-1.5 text-ochre mb-1">
+            <Zap size={10} />
+            <span className="text-[8px] font-black uppercase tracking-widest">Memory Tasks</span>
+          </div>
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-lg font-[900] text-royalHigh">{activeRecallTasks.length}</span>
+            <span className="text-[10px] font-black text-buttery">planned</span>
+          </div>
+          <p className="text-[7px] font-black text-grapeBottle/40 mt-1">With spaced rep</p>
+          <div className="absolute -right-2 -bottom-2 opacity-[0.03]">
+            <Zap size={40} />
+          </div>
+        </div>
+      </div>
+
       {/* 今日のミッション (與 Planner 連動的主區塊) */}
       <section className="space-y-4">
         <div className="flex items-center gap-2 px-1">
           <ListChecks size={16} className="text-ochre" />
-          <h3 className="text-[11px] font-black text-royalHigh uppercase tracking-[0.2em]">本日のミッション</h3>
+          <h3 className="text-[11px] font-black text-royalHigh uppercase tracking-[0.2em]">Today's Missions</h3>
         </div>
         <div className="space-y-3">
           {todayTasks.length > 0 ? (
@@ -140,14 +202,14 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
                   </h4>
                   <div className="flex items-center gap-2 mt-1.5 opacity-60">
                     <Clock size={8} className="text-ochre" />
-                    <span className="text-[8px] font-black text-grapeBottle uppercase tracking-widest">{task.estimatedMinutes}分</span>
+                    <span className="text-[8px] font-black text-grapeBottle uppercase tracking-widest">{task.estimatedMinutes} mins</span>
                   </div>
                 </div>
               </div>
             ))
           ) : (
             <div className="bg-white/40 border-2 border-dashed border-amurLilac/40 rounded-[28px] py-10 text-center">
-              <p className="text-[10px] font-bold text-grapeBottle/30 uppercase tracking-widest italic">本日のタスクはありません</p>
+              <p className="text-[10px] font-bold text-grapeBottle/30 uppercase tracking-widest italic">No tasks for today</p>
             </div>
           )}
         </div>
@@ -157,7 +219,7 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
       <section className="bg-white p-6 rounded-[32px] border border-amurLilac shadow-sm">
         <div className="flex items-center gap-2 mb-5">
           <Plus size={16} className="text-ochre" />
-          <h3 className="text-[10px] font-black text-royalHigh uppercase tracking-widest">演習結果を記録</h3>
+          <h3 className="text-[10px] font-black text-royalHigh uppercase tracking-widest">Log Practice Result</h3>
         </div>
         <div className="space-y-4">
           <div className="relative">
@@ -179,7 +241,7 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
             </div>
           </div>
             <button onClick={handleCommit} className="w-full bg-royalHigh text-white py-5 rounded-[24px] font-[900] text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-royalHigh/10 active:scale-[0.98] transition-all">
-            記録を保存
+            Save Result
           </button>
         </div>
       </section>

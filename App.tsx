@@ -30,6 +30,7 @@ type View = 'dashboard' | 'planner' | 'analytics' | 'settings';
 const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [view, setView] = useState<View>('dashboard');
+  const [systemToday, setSystemToday] = useState<Date>(new Date());
   
   const [profile, setProfile] = useState<UserProfile>(INITIAL_PROFILE);
   const [tasks, setTasks] = useState<StudyTask[]>([]);
@@ -37,14 +38,18 @@ const App: React.FC = () => {
   const [errors, setErrors] = useState<ErrorEntry[]>([]);
 
   const isInitialLoad = useRef(true);
-  const SYSTEM_TODAY = new Date(2026, 0, 14);
+
+  // 初始化時從系統獲得今天的日期
+  useEffect(() => {
+    setSystemToday(new Date());
+  }, []);
 
   const rolloverIncompleteTasks = (taskList: StudyTask[]): StudyTask[] => {
-    const todayStr = format(SYSTEM_TODAY, 'yyyy-MM-dd');
+    const todayStr = format(systemToday, 'yyyy-MM-dd');
     return taskList.map(task => {
       try {
         const taskDate = parseISO(task.date);
-        if (!task.completed && isBefore(taskDate, SYSTEM_TODAY)) {
+        if (!task.completed && isBefore(taskDate, systemToday)) {
           return { ...task, date: todayStr };
         }
       } catch (e) {}
@@ -86,7 +91,7 @@ const App: React.FC = () => {
   const handleLogMbe = (subject: Subject, total: number, wrong: number) => {
     const newLog: PracticeLog = {
       id: `log-${Date.now()}`,
-      date: format(SYSTEM_TODAY, "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+      date: format(systemToday, "yyyy-MM-dd'T'HH:mm:ss'Z'"),
       subject,
       total,
       wrong
@@ -94,7 +99,7 @@ const App: React.FC = () => {
     setPracticeLogs(prev => [newLog, ...prev]);
   };
 
-  const daysLeft = differenceInDays(new Date(profile.examDate), SYSTEM_TODAY);
+  const daysLeft = differenceInDays(new Date(profile.examDate), systemToday);
 
   if (isLoading) return (
     <div className="min-h-screen flex items-center justify-center bg-bgMain">

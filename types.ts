@@ -10,7 +10,8 @@ export enum Subject {
   BUSINESS_ASSOCIATIONS = 'Business Associations (Agency, Partnership, Corp, LLC)'
 }
 
-export type TaskType = 'MBE' | 'MEE' | 'Review' | 'Flashcard' | 'Outline';
+export type TaskType = 'MBE' | 'MEE' | 'Review' | 'Flashcard' | 'Outline' | 'ActiveRecall' | 'RuleWriting' | 'MockReview' | 'ErrorAnalysis' | 'MockExam' | 'TemplateReview';
+export type DifficultyLevel = 'easy' | 'medium' | 'hard';
 
 export interface StudyTask {
   id: string;
@@ -21,6 +22,8 @@ export interface StudyTask {
   count?: number; 
   completed: boolean;
   estimatedMinutes: number;
+  memoryTag?: string; // e.g., "spaced-rep-1", "active-recall", "interval-review"
+  linkedTaskId?: string; // For spaced repetition, links to original task
 }
 
 export interface Flashcard {
@@ -85,4 +88,26 @@ export interface ErrorEntry {
   rule: string;
   keyFacts: string;
   createdAt: string;
+  difficulty_level?: DifficultyLevel;
+  next_review_date?: string; // Spaced repetition tracking
+}
+
+// Rule Deck for spaced repetition memory tracking
+export interface RuleCard {
+  id: string;
+  subject: Subject;
+  ruleText: string;
+  priority: 'high' | 'medium' | 'low';
+  createdDate: string;
+  next_review_date: string;
+  reviewCount: number;
+  lastReviewDate: string;
+}
+
+// Memory System Statistics
+export interface MemoryStats {
+  totalRulesInDeck: number;
+  overduedRules: number;
+  reviewCoveragePercentage: number; // Target: 80%+
+  activeRecallTimePercent: number; // Target: 25-35%
 }
