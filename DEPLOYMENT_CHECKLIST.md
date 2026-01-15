@@ -95,23 +95,14 @@ npm run preview
 
 ### Cloudflare Pages 部署
 
-**方法 A: CLI 部署 (需要 Cloudflare 帳戶)**
+**方法 A: CLI 部署 (推薦) - 需要 Cloudflare 帳戶**
 ```bash
 npx wrangler login
 npm run deploy
 ```
 
-**方法 B: Git 集成部署 (推薦)**
-1. 推送到 GitHub
-2. Cloudflare Dashboard → Pages → 新建項目
-3. 連接 GitHub repo
-4. 設置:
-   - Build command: `npm run build`
-   - Build output: `dist`
-5. 自動部署！
-
-**方法 C: 手動上傳**
-1. 進入 Cloudflare Dashboard
+**方法 B: 手動上傳**
+1. 進入 [Cloudflare Dashboard](https://dash.cloudflare.com/)
 2. Pages → Upload assets
 3. 上傳 `dist/` 目錄內所有文件
 
