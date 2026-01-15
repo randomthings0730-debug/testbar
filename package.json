@@ -8,8 +8,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "start": "vite preview",
-    "deploy": "npm run build && npx wrangler pages deploy dist"
+    "start": "vite preview"
   },
   "dependencies": {
     "@google/genai": "^1.35.0",
