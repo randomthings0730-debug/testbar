@@ -2,7 +2,7 @@
 import React, { useMemo, useState } from 'react';
 import { StudyTask, UserProfile, Subject, PracticeLog, ErrorEntry } from '../types';
 import { Plus, CheckCircle2, Percent, Book, PenTool, Target, ChevronRight, AlertCircle } from 'lucide-react';
-import { isSameDay, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 
 interface DashboardProps {
   tasks: StudyTask[];
@@ -14,20 +14,20 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, practiceLogs, onLogMbe, errors = [] }) => {
+  // 系統基準日期：2026-01-14
   const SYSTEM_TODAY = new Date(2026, 0, 14);
+  const todayStr = format(SYSTEM_TODAY, 'yyyy-MM-dd');
 
+  // 資料連動核心：使用字串比對確保與 Planner 任務完全一致
   const todayTasks = useMemo(() => {
-    return tasks.filter(t => {
-      try {
-        return isSameDay(parseISO(t.date), SYSTEM_TODAY);
-      } catch (e) {
-        return t.date === '2026-01-14';
-      }
-    });
-  }, [tasks]);
+    return tasks.filter(t => t.date === todayStr);
+  }, [tasks, todayStr]);
   
+  // 自動抓取今日最重要的任務作為重點項目
   const focusTask = useMemo(() => {
-    return todayTasks.find(t => t.type === 'Outline') || todayTasks.find(t => t.type === 'Review');
+    return todayTasks.find(t => t.type === 'Outline') || 
+           todayTasks.find(t => t.type === 'Review') || 
+           todayTasks[0];
   }, [todayTasks]);
 
   const globalTotalDone = useMemo(() => {
@@ -64,7 +64,7 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
       
       {/* 1. 頂部並排區塊：重點項目 + 平均正答率 */}
       <section className="grid grid-cols-2 gap-3">
-        {/* 左側：今日重點內容 (縮小版) */}
+        {/* 左側：今日重點內容 */}
         <div className="bg-white rounded-[32px] sm:rounded-[40px] p-4 sm:p-8 border border-amurLilac shadow-sm flex flex-col justify-between hover:border-buttery transition-all">
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -75,15 +75,15 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
               <p className="text-[8px] sm:text-[10px] font-black text-ochre uppercase tracking-widest">重点</p>
             </div>
             <h2 className="text-sm sm:text-xl font-black text-royalHigh leading-tight line-clamp-2">
-              {focusTask ? focusTask.description : "演習集中"}
+              {focusTask ? focusTask.description : "本日の演習"}
             </h2>
           </div>
           <p className="text-[7px] sm:text-[10px] font-bold text-royalDignity uppercase tracking-widest mt-2 flex items-center gap-1">
-            <Target size={10} /> {focusTask?.subject || "All"}
+            <Target size={10} /> {focusTask?.subject || "All Subjects"}
           </p>
         </div>
 
-        {/* 右側：平均正答率 (縮小版) */}
+        {/* 右側：平均正答率 */}
         <div className="bg-white rounded-[32px] sm:rounded-[40px] p-4 sm:p-8 border border-amurLilac shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -104,7 +104,7 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
         </div>
       </section>
 
-      {/* 2. MBE 總目標進度 (全寬) */}
+      {/* 2. MBE 總目標進度 */}
       <section className="bg-royalHigh rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 text-white shadow-xl shadow-royalHigh/10 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-bl-full pointer-events-none"></div>
         <div className="relative z-10">
@@ -138,7 +138,7 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks, profile, onToggleTask, pra
         </div>
       )}
 
-      {/* 4. 本日のミッション詳細 (主要大面積區塊) */}
+      {/* 4. 本日のミッション詳細 (連動 Planner 資料) */}
       <section className="space-y-3">
         <div className="flex items-center gap-2 px-3">
           <div className="w-1.5 h-1.5 rounded-full bg-buttery"></div>
