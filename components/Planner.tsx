@@ -20,20 +20,13 @@ interface PlannerProps {
 }
 
 const Planner: React.FC<PlannerProps> = ({ tasks, setTasks, deleteTask, toggleTask, examDate }) => {
-  // 使用系統時間而非固定日期
-  const [systemToday, setSystemToday] = useState<Date | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [currentMonth, setCurrentMonth] = useState<Date | null>(null);
+  // 使用系統時間而非固定日期 - 初始化為當前日期以避免 null 錯誤
+  const today = new Date();
+  const [systemToday, setSystemToday] = useState<Date>(today);
+  const [selectedDate, setSelectedDate] = useState<Date>(today);
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date(today.getFullYear(), today.getMonth(), 1));
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isNewTask, setIsNewTask] = useState(true);
-
-  // 初始化時從系統獲得今天的日期
-  useEffect(() => {
-    const today = new Date();
-    setSystemToday(today);
-    setSelectedDate(today);
-    setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
-  }, []);
   
   const [editForm, setEditForm] = useState<StudyTask>({
     id: '', date: '', type: 'Outline', subject: Subject.TORTS, 
