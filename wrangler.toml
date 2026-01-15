@@ -1,1 +1,14 @@
-���
+name = "testbar"
+type = "javascript"
+account_id = "你的 Cloudflare 帳號 ID"
+workers_dev = true
+compatibility_date = "2026-01-15"
+
+# 如果你有靜態檔案（Worker Sites）
+# [site]
+# bucket = "./dist"
+# entry-point = "workers-site"
+
+[build]
+command = "npm run build"
+upload_format = "service-worker"
